@@ -37,6 +37,7 @@ export interface ChatSession {
 /** Lightweight session summary for the sidebar / archive view. */
 export interface SessionSummary {
   session_id: string;
+  name: string | null;
   created_at: string;
   updated_at: string;
   preview: string | null;
@@ -53,6 +54,8 @@ export interface LLMResponse {
   components: string;
   /** Follow-up question suggestions the user can click. */
   suggested_follow_ups: string[];
+  /** Auto-generated session name (only present on first message). */
+  session_name?: string;
 }
 
 // ── API Functions ──────────────────────────────────────────
@@ -107,5 +110,35 @@ export async function getSessionHistory(
 ): Promise<ChatSession> {
   const res = await fetch(`${API_BASE}/api/chat/session/${sessionId}`);
   if (!res.ok) throw new Error("Failed to fetch session history");
+  return res.json();
+}
+
+/**
+ * Rename a session.
+ * @returns The updated session name.
+ */
+export async function renameSession(
+  sessionId: string,
+  name: string
+): Promise<{ ok: boolean; name: string }> {
+  const res = await fetch(`${API_BASE}/api/chat/session/${sessionId}/name`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error("Failed to rename session");
+  return res.json();
+}
+
+/**
+ * Delete a session permanently.
+ */
+export async function deleteSession(
+  sessionId: string
+): Promise<{ ok: boolean }> {
+  const res = await fetch(`${API_BASE}/api/chat/session/${sessionId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete session");
   return res.json();
 }

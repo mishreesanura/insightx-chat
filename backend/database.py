@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timezone
 from typing import List, Optional
 
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from models import ChatSession, Message, SessionSummary
@@ -20,10 +21,21 @@ _db = None
 async def connect_db():
     """Open the MongoDB connection (called at app startup)."""
     global _client, _db
-    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/insightx")
-    _client = AsyncIOMotorClient(mongo_uri)
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017/insightx").strip()
+    _client = AsyncIOMotorClient(
+        mongo_uri,
+        serverSelectionTimeoutMS=5000,
+        connectTimeoutMS=5000,
+        socketTimeoutMS=10000,
+        tlsCAFile=certifi.where(),
+    )
     _db = _client.get_default_database("insightx")
-    print(f"✅  Connected to MongoDB – database: {_db.name}")
+    # Verify connectivity with a fast ping
+    try:
+        await _client.admin.command("ping")
+        print(f"✅  Connected to MongoDB – database: {_db.name}")
+    except Exception as e:
+        print(f"⚠️  MongoDB ping failed: {e}  (operations will retry on demand)")
 
 
 async def close_db():
@@ -56,6 +68,7 @@ async def get_all_sessions() -> List[SessionSummary]:
         {},
         {
             "session_id": 1,
+            "name": 1,
             "created_at": 1,
             "updated_at": 1,
             "messages": {"$slice": 1},  # first message for preview
@@ -72,6 +85,7 @@ async def get_all_sessions() -> List[SessionSummary]:
         sessions.append(
             SessionSummary(
                 session_id=doc["session_id"],
+                name=doc.get("name"),
                 created_at=doc["created_at"],
                 updated_at=doc["updated_at"],
                 preview=preview,
@@ -116,3 +130,18 @@ async def append_message_pair(
         },
     )
     return result.modified_count == 1
+
+
+async def update_session_name(session_id: str, name: str) -> bool:
+    """Set or update the session's display name."""
+    result = await _get_collection().update_one(
+        {"session_id": session_id},
+        {"$set": {"name": name}},
+    )
+    return result.modified_count == 1
+
+
+async def delete_session(session_id: str) -> bool:
+    """Permanently delete a chat session."""
+    result = await _get_collection().delete_one({"session_id": session_id})
+    return result.deleted_count == 1

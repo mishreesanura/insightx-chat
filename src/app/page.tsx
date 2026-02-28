@@ -11,290 +11,32 @@ import {
   Archive,
   Moon,
   Sun,
-  AlertCircle,
   BarChart3,
   TrendingUp,
   Clock,
   ShieldAlert,
-  ChevronLeft,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
+  Pencil,
+  Check,
+  X,
+  Trash2,
+  Plus,
 } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DynamicComponentRenderer } from "@/components/dynamic-renderer";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-} from "recharts";
-
-/* ───────────────────────────────────────────────
-   Utility
-   ─────────────────────────────────────────────── */
-function cn(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-/* ───────────────────────────────────────────────
-   Inline shadcn-style Components
-   ─────────────────────────────────────────────── */
-
-// Badge
-function Badge({
-  children,
-  variant = "default",
-  className,
-}: {
-  children: React.ReactNode;
-  variant?: "default" | "secondary" | "destructive" | "outline" | "success";
-  className?: string;
-}) {
-  const base =
-    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors";
-  const variants: Record<string, string> = {
-    default: "border-transparent bg-primary text-primary-foreground",
-    secondary: "border-transparent bg-secondary text-secondary-foreground",
-    destructive: "border-transparent bg-red-600 text-white",
-    outline: "text-foreground",
-    success: "border-transparent bg-emerald-600 text-white",
-  };
-  return (
-    <span
-      className={cn(base, variants[variant] || variants.default, className)}
-    >
-      {children}
-    </span>
-  );
-}
-
-// Skeleton
-function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-md bg-muted", className)} />;
-}
-
-/* ───────────────────────────────────────────────
-   Mock Data
-   ─────────────────────────────────────────────── */
-
-const MOCK_RESPONSE = {
-  role: "assistant" as const,
-  narrative:
-    "Based on the transaction dataset, Bill Payments show the highest failure rate at 8.2%. Here is the detailed breakdown.",
-  components: [
-    {
-      type: "card_carousel",
-      cards: [
-        {
-          id: "card_1",
-          title: "Maharashtra",
-          description: "Highest P2M Volume",
-          content: "₹4.2M",
-          trend: { value: "+12%", direction: "up" },
-          footer: "Compared to yesterday",
-          badges: [{ label: "Top Performer", variant: "default" }],
-        },
-        {
-          id: "card_2",
-          title: "Karnataka",
-          description: "Fastest Growth",
-          content: "₹2.8M",
-          trend: { value: "+28%", direction: "up" },
-          footer: "Week over week",
-          badges: [{ label: "Trending", variant: "success" }],
-        },
-        {
-          id: "card_3",
-          title: "Tamil Nadu",
-          description: "High Failure Rate",
-          content: "8.2%",
-          trend: { value: "+3.1%", direction: "up" },
-          footer: "Above threshold",
-          badges: [{ label: "Alert", variant: "destructive" }],
-        },
-        {
-          id: "card_4",
-          title: "Delhi NCR",
-          description: "Lowest Latency",
-          content: "120ms",
-          trend: { value: "-15%", direction: "down" },
-          footer: "Improved from 140ms",
-          badges: [{ label: "Stable", variant: "secondary" }],
-        },
-      ],
-    },
-    {
-      type: "chart",
-      chart_type: "composed",
-      title: "Transaction Volume vs Failure Rate",
-      description: "Hourly breakdown for current date",
-      footer_text: "Peak failure rate observed at 14:00.",
-      data: [
-        { category: "10:00", volume: 120000, rate: 1.8 },
-        { category: "11:00", volume: 135000, rate: 2.0 },
-        { category: "12:00", volume: 150000, rate: 2.1 },
-        { category: "13:00", volume: 185000, rate: 3.5 },
-        { category: "14:00", volume: 210000, rate: 5.2 },
-        { category: "15:00", volume: 178000, rate: 4.1 },
-        { category: "16:00", volume: 165000, rate: 3.0 },
-      ],
-      config: {
-        xAxis: { dataKey: "category", label: "Time of Day" },
-        yAxis: { label: "Volume (INR)" },
-        secondary_yAxis: {
-          label: "Failure Rate (%)",
-          orientation: "right",
-        },
-        tooltip: true,
-        legend: true,
-        series: [
-          {
-            dataKey: "volume",
-            label: "Total Volume (INR)",
-            type: "bar",
-            color: "#3b82f6",
-            yAxisId: "left",
-          },
-          {
-            dataKey: "rate",
-            label: "Failure Rate (%)",
-            type: "line",
-            color: "#ef4444",
-            yAxisId: "right",
-          },
-        ],
-      },
-    },
-    {
-      type: "table",
-      title: "Anomalous Transactions Flagged for Review",
-      description: "High-value transfers on 3G networks.",
-      columns: [
-        { key: "tx_id", header: "Transaction ID", format: "text" },
-        { key: "amount", header: "Amount", format: "currency" },
-        { key: "status", header: "Status", format: "badge" },
-      ],
-      rows: [
-        {
-          tx_id: "TXN-99482",
-          amount: 150000,
-          status: { label: "Flagged", variant: "destructive" },
-        },
-        {
-          tx_id: "TXN-99501",
-          amount: 87000,
-          status: { label: "Review", variant: "destructive" },
-        },
-        {
-          tx_id: "TXN-99523",
-          amount: 220000,
-          status: { label: "Cleared", variant: "success" },
-        },
-      ],
-      summary_row: {
-        tx_id: "Total Flagged",
-        amount: 457000,
-        status: null,
-      },
-    },
-    { type: "separator" },
-    {
-      type: "list",
-      title: "Recent Failed Transactions",
-      items: [
-        {
-          id: "item_1",
-          leading_slot: { type: "text", value: "TXN-001" },
-          default_slot: "Payment to Amazon Web Services",
-          secondary_slot: "B2B Transaction • Server Costs",
-          tertiary_slot: "HDFC Credit Card",
-          metadata_slot: "Today, 10:45 AM",
-          trailing_slot: {
-            is_badge: true,
-            text: "Failed",
-            variant: "destructive",
-          },
-        },
-        {
-          id: "item_2",
-          leading_slot: { type: "icon", value: "AlertCircle" },
-          default_slot: "UPI Transfer to Vendor",
-          secondary_slot: "P2M Transaction • Office Supplies",
-          tertiary_slot: "SBI Debit Card",
-          metadata_slot: "Today, 11:20 AM",
-          trailing_slot: {
-            is_badge: true,
-            text: "Timeout",
-            variant: "destructive",
-          },
-        },
-      ],
-    },
-    { type: "separator" },
-    {
-      type: "select",
-      prompt_text: "Would you like to filter this analysis by device type?",
-      parameter_name: "device_type",
-      placeholder: "Select Device Type",
-      options: [
-        { label: "All Devices", value: "ALL" },
-        { label: "Android", value: "Android" },
-        { label: "iOS", value: "iOS" },
-        { label: "Web", value: "Web" },
-      ],
-    },
-  ],
-  suggested_follow_ups: [
-    "Why are Bill Payments failing?",
-    "Show me the failure rate by network type.",
-    "Compare Android vs iOS failure rates.",
-  ],
-};
-
-const ARCHIVE_ITEMS = [
-  {
-    id: 1,
-    title: "Transaction Volume Analysis - Q4 2025",
-    date: "Yesterday, 2:30 PM",
-    messages: 12,
-    starred: false,
-  },
-  {
-    id: 2,
-    title: "Failure Rate Deep Dive - Maharashtra",
-    date: "Feb 25, 4:15 PM",
-    messages: 8,
-    starred: true,
-  },
-  {
-    id: 3,
-    title: "Network Latency Investigation",
-    date: "Feb 24, 11:00 AM",
-    messages: 15,
-    starred: false,
-  },
-  {
-    id: 4,
-    title: "P2M vs Bill Payment Comparison",
-    date: "Feb 23, 9:45 AM",
-    messages: 6,
-    starred: true,
-  },
-  {
-    id: 5,
-    title: "Risk Assessment - High Value Transfers",
-    date: "Feb 22, 3:20 PM",
-    messages: 20,
-    starred: false,
-  },
-];
+  createSession,
+  sendMessage,
+  getSessions,
+  getSessionHistory,
+  renameSession,
+  deleteSession,
+  type LLMResponse,
+  type SessionSummary,
+} from "@/lib/frontend_api";
 
 /* ───────────────────────────────────────────────
    TypeScript Interfaces
@@ -308,521 +50,34 @@ interface ChatMessage {
 }
 
 /* ───────────────────────────────────────────────
-   Dynamic Component Renderer
-   ─────────────────────────────────────────────── */
-function DynamicComponentRenderer({ component }: { component: any }) {
-  switch (component.type) {
-    case "card_carousel":
-      return <CardCarouselRenderer cards={component.cards} />;
-    case "chart":
-      return <ChartRenderer component={component} />;
-    case "table":
-      return <TableRenderer component={component} />;
-    case "list":
-      return <ListRenderer component={component} />;
-    case "select":
-      return <SelectRenderer component={component} />;
-    case "separator":
-      return (
-        <div className="my-6 h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
-      );
-    default:
-      return null;
-  }
-}
-
-/* Card Carousel */
-function CardCarouselRenderer({ cards }: { cards: any[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollLeft = () =>
-    scrollRef.current?.scrollBy({ left: -300, behavior: "smooth" });
-  const scrollRight = () =>
-    scrollRef.current?.scrollBy({ left: 300, behavior: "smooth" });
-
-  return (
-    <div className="mt-4 relative group">
-      <button
-        onClick={scrollLeft}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg -ml-4"
-      >
-        <ChevronLeft size={16} />
-      </button>
-      <button
-        onClick={scrollRight}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg -mr-4"
-      >
-        <ChevronRight size={16} />
-      </button>
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide"
-      >
-        {cards.map((card: any, i: number) => (
-          <div
-            key={card.id || i}
-            className="snap-start shrink-0 w-[260px] rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 hover:bg-card/80 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  {card.title}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {card.description}
-                </p>
-              </div>
-              {card.badges?.map((b: any, j: number) => (
-                <Badge key={j} variant={b.variant} className="ml-2 shrink-0">
-                  {b.label}
-                </Badge>
-              ))}
-            </div>
-            <div className="text-3xl font-bold tracking-tight text-foreground mb-1">
-              {card.content}
-            </div>
-            {card.trend && (
-              <div className="flex items-center gap-1 mb-2">
-                {card.trend.direction === "up" ? (
-                  <ArrowUpRight
-                    size={14}
-                    className={
-                      card.trend.value.startsWith("+")
-                        ? "text-emerald-500"
-                        : "text-red-500"
-                    }
-                  />
-                ) : (
-                  <ArrowDownRight size={14} className="text-emerald-500" />
-                )}
-                <span
-                  className={cn(
-                    "text-sm font-medium",
-                    card.trend.direction === "up" &&
-                      card.trend.value.startsWith("+")
-                      ? "text-emerald-500"
-                      : card.trend.direction === "down"
-                        ? "text-emerald-500"
-                        : "text-red-500",
-                  )}
-                >
-                  {card.trend.value}
-                </span>
-              </div>
-            )}
-            {card.footer && (
-              <p className="text-xs text-muted-foreground">{card.footer}</p>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* Chart */
-function ChartRenderer({ component }: { component: any }) {
-  const { config, data, chart_type, title, description, footer_text } =
-    component;
-  const hasSecondaryYAxis = !!config.secondary_yAxis;
-
-  return (
-    <div className="mt-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm p-5 overflow-hidden">
-      {title && (
-        <h4 className="text-sm font-semibold text-foreground mb-1">{title}</h4>
-      )}
-      {description && (
-        <p className="text-xs text-muted-foreground mb-4">{description}</p>
-      )}
-      <div className="h-[280px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          {chart_type === "composed" || hasSecondaryYAxis ? (
-            <ComposedChart data={data}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
-                vertical={false}
-              />
-              <XAxis
-                dataKey={config.xAxis.dataKey}
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                yAxisId="left"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val: number) =>
-                  val >= 1000 ? `₹${(val / 1000).toFixed(0)}k` : `${val}`
-                }
-              />
-              {hasSecondaryYAxis && (
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(val: number) => `${val}%`}
-                />
-              )}
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-                itemStyle={{ color: "hsl(var(--foreground))" }}
-                labelStyle={{ color: "hsl(var(--muted-foreground))" }}
-              />
-              {config.legend && (
-                <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
-              )}
-              {config.series.map((s: any, i: number) =>
-                s.type === "bar" ? (
-                  <Bar
-                    key={i}
-                    yAxisId={s.yAxisId || "left"}
-                    dataKey={s.dataKey}
-                    name={s.label}
-                    fill={s.color}
-                    radius={[4, 4, 0, 0]}
-                    opacity={0.9}
-                  />
-                ) : s.type === "line" ? (
-                  <Line
-                    key={i}
-                    yAxisId={s.yAxisId || "left"}
-                    type="monotone"
-                    dataKey={s.dataKey}
-                    name={s.label}
-                    stroke={s.color}
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: s.color }}
-                    activeDot={{ r: 6 }}
-                  />
-                ) : s.type === "area" ? (
-                  <Area
-                    key={i}
-                    yAxisId={s.yAxisId || "left"}
-                    type="monotone"
-                    dataKey={s.dataKey}
-                    name={s.label}
-                    stroke={s.color}
-                    fill={s.color}
-                    fillOpacity={0.1}
-                  />
-                ) : null,
-              )}
-            </ComposedChart>
-          ) : chart_type === "bar" ? (
-            <BarChart data={data}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
-                vertical={false}
-              />
-              <XAxis
-                dataKey={config.xAxis.dataKey}
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                yAxisId="left"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val: number) =>
-                  val >= 1000 ? `₹${(val / 1000).toFixed(0)}k` : `${val}`
-                }
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
-              {config.series.map((s: any, i: number) => (
-                <Bar
-                  key={i}
-                  yAxisId={s.yAxisId || "left"}
-                  dataKey={s.dataKey}
-                  name={s.label}
-                  fill={s.color}
-                  radius={[4, 4, 0, 0]}
-                />
-              ))}
-            </BarChart>
-          ) : (
-            <LineChart data={data}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--border))"
-                vertical={false}
-              />
-              <XAxis
-                dataKey={config.xAxis.dataKey}
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                yAxisId="left"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
-              {config.series.map((s: any, i: number) => (
-                <Line
-                  key={i}
-                  yAxisId={s.yAxisId || "left"}
-                  type="monotone"
-                  dataKey={s.dataKey}
-                  name={s.label}
-                  stroke={s.color}
-                  strokeWidth={2}
-                />
-              ))}
-            </LineChart>
-          )}
-        </ResponsiveContainer>
-      </div>
-      {footer_text && (
-        <p className="text-xs text-muted-foreground mt-3 italic">
-          {footer_text}
-        </p>
-      )}
-    </div>
-  );
-}
-
-/* Table */
-function TableRenderer({ component }: { component: any }) {
-  return (
-    <div className="mt-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden">
-      {component.title && (
-        <div className="px-5 pt-4 pb-2">
-          <h4 className="text-sm font-semibold text-foreground">
-            {component.title}
-          </h4>
-          {component.description && (
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {component.description}
-            </p>
-          )}
-        </div>
-      )}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/50 bg-muted/30">
-              {component.columns.map((col: any) => (
-                <th
-                  key={col.key}
-                  className={cn(
-                    "px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider",
-                    col.align === "right"
-                      ? "text-right"
-                      : col.align === "center"
-                        ? "text-center"
-                        : "text-left",
-                  )}
-                >
-                  {col.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {component.rows.map((row: any, i: number) => (
-              <tr
-                key={i}
-                className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors"
-              >
-                {component.columns.map((col: any) => (
-                  <td
-                    key={col.key}
-                    className={cn(
-                      "px-5 py-3.5",
-                      col.align === "right"
-                        ? "text-right"
-                        : col.align === "center"
-                          ? "text-center"
-                          : "text-left",
-                    )}
-                  >
-                    {col.format === "currency" ? (
-                      <span className="font-mono">
-                        ₹{row[col.key]?.toLocaleString("en-IN")}
-                      </span>
-                    ) : col.format === "badge" && row[col.key] ? (
-                      <Badge variant={row[col.key].variant}>
-                        {row[col.key].label}
-                      </Badge>
-                    ) : (
-                      <span className="font-mono text-muted-foreground">
-                        {row[col.key]}
-                      </span>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-            {component.summary_row && (
-              <tr className="bg-muted/20 font-semibold">
-                {component.columns.map((col: any) => (
-                  <td
-                    key={col.key}
-                    className={cn(
-                      "px-5 py-3.5",
-                      col.align === "right" ? "text-right" : "text-left",
-                    )}
-                  >
-                    {col.format === "currency" &&
-                    component.summary_row[col.key] ? (
-                      <span className="font-mono">
-                        ₹
-                        {component.summary_row[col.key]?.toLocaleString(
-                          "en-IN",
-                        )}
-                      </span>
-                    ) : col.format === "badge" &&
-                      component.summary_row[col.key] ? (
-                      <Badge variant={component.summary_row[col.key].variant}>
-                        {component.summary_row[col.key].label}
-                      </Badge>
-                    ) : (
-                      component.summary_row[col.key] || ""
-                    )}
-                  </td>
-                ))}
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-/* List */
-function ListRenderer({ component }: { component: any }) {
-  return (
-    <div className="mt-4">
-      {component.title && (
-        <h4 className="text-sm font-semibold text-foreground mb-3">
-          {component.title}
-        </h4>
-      )}
-      <div className="space-y-2">
-        {component.items.map((item: any, i: number) => (
-          <div
-            key={item.id || i}
-            className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/60 transition-all duration-200"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              {item.leading_slot && (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground">
-                  {item.leading_slot.type === "icon" ? (
-                    <AlertCircle size={16} />
-                  ) : (
-                    <span className="text-[10px] font-bold tracking-tight">
-                      {item.leading_slot.value}
-                    </span>
-                  )}
-                </div>
-              )}
-              <div className="min-w-0">
-                <div className="font-medium text-sm text-foreground truncate">
-                  {item.default_slot}
-                </div>
-                <div className="text-xs text-muted-foreground truncate">
-                  {item.secondary_slot}
-                </div>
-                {item.tertiary_slot && (
-                  <div className="text-xs text-muted-foreground/60 truncate">
-                    {item.tertiary_slot}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
-              {item.metadata_slot && (
-                <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                  {item.metadata_slot}
-                </span>
-              )}
-              {item.trailing_slot?.is_badge && (
-                <Badge variant={item.trailing_slot.variant}>
-                  {item.trailing_slot.text}
-                </Badge>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* Select */
-function SelectRenderer({ component }: { component: any }) {
-  return (
-    <div className="mt-4 p-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm">
-      <p className="text-sm text-foreground mb-3">{component.prompt_text}</p>
-      <select className="flex h-10 w-full max-w-xs rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 appearance-none cursor-pointer">
-        <option value="" disabled selected>
-          {component.placeholder}
-        </option>
-        {component.options.map((opt: any) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-/* ───────────────────────────────────────────────
    Message Bubble
    ─────────────────────────────────────────────── */
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({
+  message,
+  onFollowUp,
+  onInteraction,
+  compact = false,
+}: {
+  message: ChatMessage;
+  onFollowUp?: (text: string) => void;
+  onInteraction?: (parameterName: string, value: string) => void;
+  compact?: boolean;
+}) {
   const isUser = message.role === "user";
 
   return (
     <div
       className={cn(
-        "flex gap-3 max-w-4xl animate-fade-in-up",
+        "flex max-w-4xl animate-fade-in-up",
+        compact ? "gap-2" : "gap-3",
         isUser ? "ml-auto flex-row-reverse" : "",
       )}
     >
       {/* Avatar */}
       <div
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold mt-1",
+          "flex shrink-0 items-center justify-center rounded-full text-xs font-bold mt-1",
+          compact ? "h-6 w-6" : "h-8 w-8",
           isUser
             ? "bg-primary text-primary-foreground"
             : "bg-gradient-to-br from-blue-600 to-violet-600 text-white",
@@ -842,7 +97,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {message.content && (
           <div
             className={cn(
-              "px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed",
+              "rounded-2xl text-[14px] leading-relaxed",
+              compact ? "px-3 py-1.5" : "px-4 py-2.5",
               isUser
                 ? "bg-primary text-primary-foreground rounded-tr-md"
                 : "bg-muted rounded-tl-md",
@@ -852,16 +108,23 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           </div>
         )}
         {message.narrative && (
-          <div className="px-4 py-2.5 rounded-2xl bg-muted/50 rounded-tl-md text-[14px] leading-relaxed text-foreground/90">
+          <div className={cn(
+            "rounded-2xl bg-muted/50 rounded-tl-md text-[14px] leading-relaxed text-foreground/90",
+            compact ? "px-3 py-1.5" : "px-4 py-2.5",
+          )}>
             {message.narrative}
           </div>
         )}
 
-        {/* Dynamic Components */}
+        {/* Dynamic Components rendered via shadcn */}
         {message.components && (
           <div className="w-full mt-1">
             {message.components.map((comp: any, idx: number) => (
-              <DynamicComponentRenderer key={idx} component={comp} />
+              <DynamicComponentRenderer
+                key={idx}
+                component={comp}
+                onInteraction={onInteraction}
+              />
             ))}
           </div>
         )}
@@ -873,6 +136,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
               {message.suggested_follow_ups.map((q: string, i: number) => (
                 <button
                   key={i}
+                  onClick={() => onFollowUp?.(q)}
                   className="px-3 py-1.5 text-xs rounded-full border border-border/50 bg-card/30 text-muted-foreground hover:text-foreground hover:bg-card/60 hover:border-primary/30 transition-all duration-200"
                 >
                   {q}
@@ -910,11 +174,44 @@ export default function InsightXApp() {
     "chat",
   );
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isCompactMode, setIsCompactMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("insightx-compact") === "true";
+    }
+    return false;
+  });
+  const [isAutoScroll, setIsAutoScroll] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("insightx-autoscroll");
+      return saved !== null ? saved === "true" : true;
+    }
+    return true;
+  });
+  const [isSaveChatHistory, setIsSaveChatHistory] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("insightx-save-history");
+      return saved !== null ? saved === "true" : true;
+    }
+    return true;
+  });
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isViewTransitioning, setIsViewTransitioning] = useState(false);
-  const [archiveItems, setArchiveItems] = useState(ARCHIVE_ITEMS);
+
+  // Session management
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionError, setSessionError] = useState(false);
+  const [archiveItems, setArchiveItems] = useState<SessionSummary[]>([]);
+  const [starredSessions, setStarredSessions] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("insightx-starred");
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    }
+    return new Set();
+  });
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Dark mode toggle
@@ -928,8 +225,35 @@ export default function InsightXApp() {
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (isAutoScroll) {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isAutoScroll]);
+
+  // Create a session on mount (with retry)
+  const initSession = async () => {
+    setSessionError(false);
+    try {
+      const res = await createSession();
+      setSessionId(res.session_id);
+    } catch (err) {
+      console.error("Session creation failed:", err);
+      setSessionError(true);
+    }
+  };
+
+  useEffect(() => {
+    initSession();
+  }, []);
+
+  // Load archive items
+  useEffect(() => {
+    if (activeView === "archive") {
+      getSessions()
+        .then(setArchiveItems)
+        .catch(console.error);
+    }
+  }, [activeView]);
 
   // View switch with skeleton
   const switchView = (view: "chat" | "archive" | "settings") => {
@@ -941,29 +265,155 @@ export default function InsightXApp() {
     }, 300);
   };
 
+  // Load an archived session into the chat view
+  const loadSession = async (sid: string) => {
+    try {
+      const session = await getSessionHistory(sid);
+      setSessionId(sid);
+      const loaded: ChatMessage[] = session.messages.map((m) => {
+        if (m.role === "user") {
+          return { role: "user" as const, content: m.text };
+        }
+        const parsed = m.components ? JSON.parse(m.components) : undefined;
+        return {
+          role: "assistant" as const,
+          narrative: m.text,
+          components: parsed,
+        };
+      });
+      setMessages(loaded);
+      switchView("chat");
+    } catch (err) {
+      console.error("Failed to load session:", err);
+    }
+  };
+
+  // Rename session
+  const handleRename = async (sid: string) => {
+    const trimmed = editingName.trim();
+    if (!trimmed) {
+      setEditingSessionId(null);
+      return;
+    }
+    try {
+      await renameSession(sid, trimmed);
+      setArchiveItems((prev) =>
+        prev.map((item) =>
+          item.session_id === sid ? { ...item, name: trimmed } : item,
+        ),
+      );
+    } catch (err) {
+      console.error("Failed to rename session:", err);
+    } finally {
+      setEditingSessionId(null);
+    }
+  };
+
+  // Delete a session
+  const handleDeleteSession = async (sid: string) => {
+    try {
+      await deleteSession(sid);
+      setArchiveItems((prev) => prev.filter((i) => i.session_id !== sid));
+      setStarredSessions((prev) => {
+        const next = new Set(prev);
+        next.delete(sid);
+        localStorage.setItem("insightx-starred", JSON.stringify([...next]));
+        return next;
+      });
+      // If we just deleted the active session, reset chat
+      if (sessionId === sid) {
+        setSessionId(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+    }
+  };
+
+  // Start a brand-new chat session
+  const startNewChat = () => {
+    setSessionId(null);
+    setMessages([]);
+    setInputValue("");
+    setSessionError(false);
+    switchView("chat");
+  };
+
   // Send message
-  const handleSend = (text?: string) => {
+  const handleSend = async (text?: string) => {
     const msg = text || inputValue.trim();
     if (!msg) return;
+
+    // Auto-create session if missing
+    let sid = sessionId;
+    if (!sid) {
+      try {
+        const res = await createSession();
+        sid = res.session_id;
+        setSessionId(sid);
+        setSessionError(false);
+      } catch {
+        setSessionError(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            narrative:
+              "Unable to connect to the server. Please make sure the backend is running and try again.",
+          },
+        ]);
+        return;
+      }
+    }
 
     setMessages((prev) => [...prev, { role: "user", content: msg }]);
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages((prev) => [...prev, MOCK_RESPONSE as ChatMessage]);
+    try {
+      const response: LLMResponse = await sendMessage(sid, msg);
+      const components = response.components
+        ? JSON.parse(response.components)
+        : undefined;
+
+      // Update archive name if LLM generated one (first message)
+      if (response.session_name) {
+        setArchiveItems((prev) =>
+          prev.map((item) =>
+            item.session_id === sid
+              ? { ...item, name: response.session_name! }
+              : item,
+          ),
+        );
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          narrative: response.narrative,
+          components,
+          suggested_follow_ups: response.suggested_follow_ups,
+        },
+      ]);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          narrative:
+            "Sorry, something went wrong while processing your request. Please try again.",
+        },
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  // Toggle favorite in archive
-  const toggleFavorite = (id: number) => {
-    setArchiveItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, starred: !item.starred } : item,
-      ),
-    );
+  // Handle interactive component selections (select, date picker)
+  const handleInteraction = (parameterName: string, value: string) => {
+    handleSend(`${parameterName}: ${value}`);
   };
 
   // Get greeting
@@ -980,9 +430,7 @@ export default function InsightXApp() {
       <header className="sticky top-0 z-50 flex h-14 items-center justify-between px-4 md:px-6 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div>
+          
           <span className="text-lg font-bold tracking-tight">InsightX</span>
         </div>
 
@@ -1011,11 +459,16 @@ export default function InsightXApp() {
           ))}
         </div>
 
-        {/* Upgrade Button */}
-        <button className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-all duration-200">
-          <Sparkles size={14} />
-          <span className="hidden sm:inline">Upgrade</span>
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={startNewChat}
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-200"
+          >
+            <Plus size={14} />
+            <span className="hidden sm:inline">New Chat</span>
+          </button>
+        </div>
       </header>
 
       {/* ─── Main Content ─── */}
@@ -1031,9 +484,6 @@ export default function InsightXApp() {
                   {messages.length === 0 ? (
                     /* Empty State */
                     <div className="flex flex-col items-center justify-center pt-16 md:pt-24 animate-fade-in-up">
-                      <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600/20 to-violet-600/20 flex items-center justify-center mb-8 animate-pulse-glow">
-                        <Sparkles className="h-8 w-8 text-blue-500" />
-                      </div>
                       <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight text-center">
                         {getGreeting()}!
                       </h1>
@@ -1098,9 +548,15 @@ export default function InsightXApp() {
                     </div>
                   ) : (
                     /* Message Thread */
-                    <div className="space-y-6">
+                    <div className={cn("space-y-6", isCompactMode && "space-y-3")}>
                       {messages.map((msg, idx) => (
-                        <MessageBubble key={idx} message={msg} />
+                        <MessageBubble
+                          key={idx}
+                          message={msg}
+                          compact={isCompactMode}
+                          onFollowUp={handleSend}
+                          onInteraction={handleInteraction}
+                        />
                       ))}
                       {isLoading && (
                         <div className="flex gap-3 animate-fade-in-up">
@@ -1138,39 +594,254 @@ export default function InsightXApp() {
                   <p className="text-sm text-muted-foreground mb-6">
                     Your previous analysis sessions
                   </p>
-                  <div className="space-y-2">
-                    {archiveItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/60 transition-all duration-200 cursor-pointer group"
-                      >
-                        <div className="min-w-0">
-                          <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">
-                            {item.title}
-                          </h3>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {item.date} · {item.messages} messages
-                          </p>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(item.id);
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all duration-200",
-                            item.starred
-                              ? "text-yellow-500"
-                              : "text-muted-foreground/30 hover:text-yellow-500/70",
-                          )}
-                        >
+
+                  {/* ── Starred Sessions ── */}
+                  {(() => {
+                    const starred = archiveItems.filter((i) =>
+                      starredSessions.has(i.session_id),
+                    );
+                    if (starred.length === 0) return null;
+                    return (
+                      <div className="mb-8">
+                        <div className="flex items-center gap-2 mb-3">
                           <Star
-                            size={18}
-                            fill={item.starred ? "currentColor" : "none"}
+                            size={16}
+                            className="text-yellow-500"
+                            fill="currentColor"
                           />
-                        </button>
+                          <h3 className="text-sm font-semibold uppercase tracking-wider text-yellow-500">
+                            Starred
+                          </h3>
+                          <Separator className="flex-1 ml-1" />
+                        </div>
+                        <div className="space-y-2">
+                          {starred.map((item) => {
+                            const isEditing = editingSessionId === item.session_id;
+                            const displayName = item.name || item.preview || "Untitled Session";
+                            return (
+                              <div
+                                key={item.session_id}
+                                className="flex items-center gap-3 w-full p-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 hover:bg-yellow-500/10 hover:border-yellow-500/30 transition-all duration-200 group"
+                              >
+                                {isEditing ? (
+                                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                                    <input
+                                      autoFocus
+                                      value={editingName}
+                                      onChange={(e) => setEditingName(e.target.value)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") handleRename(item.session_id);
+                                        if (e.key === "Escape") setEditingSessionId(null);
+                                      }}
+                                      className="flex-1 bg-transparent border-b border-yellow-500/40 text-sm text-foreground outline-none py-0.5"
+                                    />
+                                    <button
+                                      onClick={() => handleRename(item.session_id)}
+                                      className="p-1 text-green-500 hover:text-green-400 transition-colors"
+                                      aria-label="Confirm rename"
+                                    >
+                                      <Check size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingSessionId(null)}
+                                      className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                                      aria-label="Cancel rename"
+                                    >
+                                      <X size={16} />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => loadSession(item.session_id)}
+                                    className="flex-1 min-w-0 text-left"
+                                  >
+                                    <h3 className="font-medium text-sm text-foreground group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors truncate">
+                                      {displayName}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                      {new Date(item.updated_at).toLocaleString()}
+                                    </p>
+                                  </button>
+                                )}
+                                {!isEditing && (
+                                  <>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingSessionId(item.session_id);
+                                        setEditingName(displayName);
+                                      }}
+                                      className="p-2 rounded-lg shrink-0 text-muted-foreground/0 group-hover:text-muted-foreground/60 hover:!text-primary transition-all duration-200"
+                                      aria-label="Rename session"
+                                    >
+                                      <Pencil size={15} />
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteSession(item.session_id);
+                                      }}
+                                      className="p-2 rounded-lg shrink-0 text-muted-foreground/0 group-hover:text-muted-foreground/60 hover:!text-red-500 transition-all duration-200"
+                                      aria-label="Delete session"
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  </>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setStarredSessions((prev) => {
+                                      const next = new Set(prev);
+                                      next.delete(item.session_id);
+                                      localStorage.setItem(
+                                        "insightx-starred",
+                                        JSON.stringify([...next]),
+                                      );
+                                      return next;
+                                    });
+                                  }}
+                                  className="p-2 rounded-lg shrink-0 text-yellow-500 hover:text-yellow-400 transition-all duration-200"
+                                  aria-label="Unstar session"
+                                >
+                                  <Star
+                                    size={18}
+                                    fill="currentColor"
+                                    className="transition-transform duration-200 hover:scale-110"
+                                  />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    ))}
+                    );
+                  })()}
+
+                  {/* ── All Sessions ── */}
+                  <div className="mb-2">
+                    <div className="flex items-center gap-2 mb-3">
+                      <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        All Sessions
+                      </h3>
+                      <Separator className="flex-1 ml-1" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {archiveItems.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-10">
+                        No previous sessions yet.
+                      </p>
+                    ) : (
+                      archiveItems.map((item) => {
+                        const isStarred = starredSessions.has(item.session_id);
+                        const isEditing = editingSessionId === item.session_id;
+                        const displayName = item.name || item.preview || "Untitled Session";
+                        return (
+                          <div
+                            key={item.session_id}
+                            className="flex items-center gap-3 w-full p-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/60 hover:border-primary/20 transition-all duration-200 group"
+                          >
+                            {isEditing ? (
+                              <div className="flex-1 min-w-0 flex items-center gap-2">
+                                <input
+                                  autoFocus
+                                  value={editingName}
+                                  onChange={(e) => setEditingName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleRename(item.session_id);
+                                    if (e.key === "Escape") setEditingSessionId(null);
+                                  }}
+                                  className="flex-1 bg-transparent border-b border-primary/40 text-sm text-foreground outline-none py-0.5"
+                                />
+                                <button
+                                  onClick={() => handleRename(item.session_id)}
+                                  className="p-1 text-green-500 hover:text-green-400 transition-colors"
+                                  aria-label="Confirm rename"
+                                >
+                                  <Check size={16} />
+                                </button>
+                                <button
+                                  onClick={() => setEditingSessionId(null)}
+                                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                                  aria-label="Cancel rename"
+                                >
+                                  <X size={16} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => loadSession(item.session_id)}
+                                className="flex-1 min-w-0 text-left"
+                              >
+                                <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                                  {displayName}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  {new Date(item.updated_at).toLocaleString()}
+                                </p>
+                              </button>
+                            )}
+                            {!isEditing && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingSessionId(item.session_id);
+                                    setEditingName(displayName);
+                                  }}
+                                  className="p-2 rounded-lg shrink-0 text-muted-foreground/0 group-hover:text-muted-foreground/60 hover:!text-primary transition-all duration-200"
+                                  aria-label="Rename session"
+                                >
+                                  <Pencil size={15} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteSession(item.session_id);
+                                  }}
+                                  className="p-2 rounded-lg shrink-0 text-muted-foreground/0 group-hover:text-muted-foreground/60 hover:!text-red-500 transition-all duration-200"
+                                  aria-label="Delete session"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setStarredSessions((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(item.session_id)) {
+                                    next.delete(item.session_id);
+                                  } else {
+                                    next.add(item.session_id);
+                                  }
+                                  localStorage.setItem(
+                                    "insightx-starred",
+                                    JSON.stringify([...next]),
+                                  );
+                                  return next;
+                                });
+                              }}
+                              className={cn(
+                                "p-2 rounded-lg shrink-0 transition-all duration-200",
+                                isStarred
+                                  ? "text-yellow-500 hover:text-yellow-400"
+                                  : "text-muted-foreground/30 hover:text-yellow-500/70",
+                              )}
+                              aria-label={isStarred ? "Unstar session" : "Star session"}
+                            >
+                              <Star
+                                size={18}
+                                fill={isStarred ? "currentColor" : "none"}
+                                className="transition-transform duration-200 hover:scale-110"
+                              />
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -1237,8 +908,25 @@ export default function InsightXApp() {
                             Reduce spacing in chat messages
                           </p>
                         </div>
-                        <button className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-muted transition-colors duration-200">
-                          <span className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200 translate-x-0" />
+                        <button
+                          onClick={() => {
+                            setIsCompactMode((prev) => {
+                              const next = !prev;
+                              localStorage.setItem("insightx-compact", String(next));
+                              return next;
+                            });
+                          }}
+                          className={cn(
+                            "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200",
+                            isCompactMode ? "bg-primary" : "bg-muted",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200",
+                              isCompactMode ? "translate-x-5" : "translate-x-0",
+                            )}
+                          />
                         </button>
                       </div>
 
@@ -1252,8 +940,25 @@ export default function InsightXApp() {
                             Scroll to bottom on new messages
                           </p>
                         </div>
-                        <button className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-primary transition-colors duration-200">
-                          <span className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200 translate-x-5" />
+                        <button
+                          onClick={() => {
+                            setIsAutoScroll((prev) => {
+                              const next = !prev;
+                              localStorage.setItem("insightx-autoscroll", String(next));
+                              return next;
+                            });
+                          }}
+                          className={cn(
+                            "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200",
+                            isAutoScroll ? "bg-primary" : "bg-muted",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200",
+                              isAutoScroll ? "translate-x-5" : "translate-x-0",
+                            )}
+                          />
                         </button>
                       </div>
                     </div>
@@ -1279,8 +984,25 @@ export default function InsightXApp() {
                             Keep your conversations for future reference
                           </p>
                         </div>
-                        <button className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-primary transition-colors duration-200">
-                          <span className="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200 translate-x-5" />
+                        <button
+                          onClick={() => {
+                            setIsSaveChatHistory((prev) => {
+                              const next = !prev;
+                              localStorage.setItem("insightx-save-history", String(next));
+                              return next;
+                            });
+                          }}
+                          className={cn(
+                            "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200",
+                            isSaveChatHistory ? "bg-primary" : "bg-muted",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg transition-transform duration-200",
+                              isSaveChatHistory ? "translate-x-5" : "translate-x-0",
+                            )}
+                          />
                         </button>
                       </div>
                     </div>
@@ -1315,6 +1037,7 @@ export default function InsightXApp() {
                 <button
                   onClick={() => handleSend()}
                   disabled={!inputValue.trim() || isLoading}
+                  type="button"
                   className={cn(
                     "p-2 rounded-xl transition-all duration-200 shrink-0",
                     inputValue.trim()

@@ -9,7 +9,7 @@ load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-MODEL = "gemini-2.5-flash-preview-04-17"
+MODEL = "gemini-flash-latest"
 
 
 # ══════════════════════════════════════════════════════════════
@@ -203,3 +203,60 @@ async def generate_ui_response(
     )
 
     return json.loads(response.text)
+
+
+# ══════════════════════════════════════════════════════════════
+# PASS 3 – Session Name Generator (lightweight, runs once)
+# ══════════════════════════════════════════════════════════════
+
+SESSION_NAME_INSTRUCTION = """
+Generate a short, descriptive title (3-7 words) for a data-analytics chat session
+based on the user's first query. The title should capture the essence of the query
+in a way a business stakeholder would understand.
+
+Examples:
+- "Show me fraud trends" => "Fraud Trend Analysis"
+- "What is total volume by bank?" => "Bank Transaction Volume"
+- "Compare P2P vs P2M" => "P2P vs P2M Comparison"
+- "Top merchants by revenue" => "Top Merchant Revenue"
+
+Return ONLY a JSON object with the key 'session_name'.
+"""
+
+
+async def generate_session_name(user_query: str) -> str:
+    """
+    Generate a concise, human-readable session name from the first user query.
+    Falls back to a truncated query on any error.
+    """
+    try:
+        contents = [
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=user_query)],
+            )
+        ]
+
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            response_schema=genai.types.Schema(
+                type=genai.types.Type.OBJECT,
+                required=["session_name"],
+                properties={
+                    "session_name": genai.types.Schema(type=genai.types.Type.STRING),
+                },
+            ),
+            system_instruction=[types.Part.from_text(text=SESSION_NAME_INSTRUCTION)],
+        )
+
+        response = client.models.generate_content(
+            model=MODEL,
+            contents=contents,
+            config=config,
+        )
+
+        result = json.loads(response.text)
+        return result["session_name"]
+    except Exception:
+        # Fallback: use truncated query
+        return user_query[:60].strip()

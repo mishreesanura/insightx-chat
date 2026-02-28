@@ -8,9 +8,11 @@ from database import (
     get_all_sessions,
     get_session_by_id,
     append_message_pair,
+    update_session_name,
+    delete_session,
 )
-from models import Message, SendMessageRequest
-from llm_service import generate_sql, generate_ui_response
+from models import Message, SendMessageRequest, RenameSessionRequest
+from llm_service import generate_sql, generate_ui_response, generate_session_name
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
@@ -62,6 +64,28 @@ async def new_session():
 async def list_sessions():
     sessions = await get_all_sessions()
     return sessions
+
+
+# ──────────────────────────────────────────────
+# PUT /api/chat/session/{session_id}/name  – rename a session
+# ──────────────────────────────────────────────
+@router.put("/session/{session_id}/name")
+async def rename_session(session_id: str, payload: RenameSessionRequest):
+    updated = await update_session_name(session_id, payload.name)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"ok": True, "name": payload.name}
+
+
+# ──────────────────────────────────────────────
+# DELETE /api/chat/session/{session_id}  – delete a session
+# ──────────────────────────────────────────────
+@router.delete("/session/{session_id}")
+async def remove_session(session_id: str):
+    deleted = await delete_session(session_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"ok": True}
 
 
 # ──────────────────────────────────────────────
@@ -133,6 +157,15 @@ async def send_message(payload: SendMessageRequest):
         components=final_response.get("components"),
     )
     await append_message_pair(session_id, user_message, model_message)
+
+    # ── 4b. Auto-generate session name on first message ───────
+    if len(chat_history) == 0:
+        try:
+            name = await generate_session_name(query)
+            await update_session_name(session_id, name)
+            final_response["session_name"] = name
+        except Exception:
+            pass  # Non-critical – skip if generation fails
 
     # ── 5. Return to frontend ─────────────────────────────────
     return final_response

@@ -23,6 +23,7 @@ class Message(BaseModel):
 class ChatSession(BaseModel):
     """Represents one conversation thread."""
     session_id: str = Field(default_factory=lambda: str(uuid4()))
+    name: Optional[str] = Field(None, description="LLM-generated or user-edited session name")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     messages: List[Message] = Field(default_factory=list)
@@ -44,9 +45,14 @@ class LLMResponse(BaseModel):
     suggested_follow_ups: List[str] = []
 
 
+class RenameSessionRequest(BaseModel):
+    name: str
+
+
 class SessionSummary(BaseModel):
     """Lightweight session object returned for the history sidebar / archive."""
     session_id: str
+    name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     preview: Optional[str] = None  # first user message text, if any
