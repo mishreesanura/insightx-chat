@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finsight.AI
+
+Finsight.AI is an intelligent, natural-language data analytics platform built for digital payment operations. It allows users to query complex transaction data using plain English, automatically translates those queries into optimized SQL, executes them against a local analytical database, and visualizes the results using dynamically generated UI components such as charts, tables, and metric cards. Currently, the system is specifically tailored and trained on a proprietary dataset of financial transaction logs.
+
+![Finsight.AI - Screenshot 1](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391584/Screenshot_2026-02-28_123904_wuv1jb.png)
+
+![Finsight.AI - Screenshot 2](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391688/Screenshot_2026-03-02_003113_jo6rc5.png)
+
+![Finsight.AI - Demo GIF](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391905/sample_ykonry.gif)
+
+## Features
+
+- **Natural Language Analytics**: Ask questions such as "Show me fraud trends" or "What is total volume by bank?" and receive immediate data-driven answers.
+- **Self-Healing Data Pipeline**: The AI agent automatically detects SQL execution errors and iteratively self-corrects (up to 3 times) before falling back, ensuring reliable and accurate answers.
+- **Dynamic UI Generation**: The system determines the optimal method to visualize your data, seamlessly rendering composed charts, interactive tables, metric carousels, and context-aware follow-up suggestions.
+- **Chat Archive & History**: Persistent chat sessions are stored in MongoDB. Users can manage previous analyses by renaming, starring, or deleting sessions.
+- **Customizable Interface**: Includes toggleable Dark/Light mode, a Compact mode for dense information viewing, and custom auto-scroll behaviors.
+
+## Sample Queries
+
+Here are some example questions you can ask the platform:
+- "Show me the total transaction amount and transaction count broken down by transaction types (P2M vs P2P)."
+- "How has the daily transaction volume fluctuated over the last 30 days?"
+- "Compare the total successful transaction values between the 18-25 and 26-35 sender age groups."
+- "Show me the 10 most recent transactions flagged for review, including the merchant category and amount."
+- "What is the distribution of devices used for Recharges?"
+
+## Tech Stack
+
+### Frontend
+- **Framework**: [Next.js](https://nextjs.org/) (App Router) & React 18
+- **Styling**: Tailwind CSS & [shadcn/ui](https://ui.shadcn.com/)
+- **Icons**: Lucide React
+- **Language**: TypeScript
+
+### Backend
+- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
+- **AI/LLM**: Google Gemini API (`gemini-flash-latest`)
+- **Data Engine**: DuckDB (Fast, in-process analytical SQL database)
+- **Database**: MongoDB (via Motor/PyMongo) for persisting session state and chat histories
+
+## Architecture Overview
+
+1. **Pass 1 (Text-to-SQL)**: The user submits a question. The backend prompts Gemini with the digital payments database schema (`transactions`) to generate a highly optimized DuckDB SQL query.
+2. **Data Execution**: The backend executes the SQL against `DuckDB` using the local CSV/Parquet data. If an error occurs, it is fed back to the LLM to self-correct in a self-healing loop.
+3. **Pass 2 (Data-to-UI)**: The raw SQL results are passed back to Gemini, which structures the output strictly into a UI-component JSON schema (e.g., Line charts, Data Tables) and generates a human-readable narrative.
+4. **Pass 3 (Session Naming)**: A lightweight background agent reads the first prompt and generates a concise, business-friendly name for the newly created session.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ and `pnpm`
+- Python 3.9+ 
+- A [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) URI
+- A [Google Gemini API Key](https://aistudio.google.com/)
+
+### 1. Backend Setup
+
+Navigate to the `backend` directory:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd backend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create a virtual environment and install dependencies:
+```bash
+python -m venv .venv
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Windows
+.venv\Scripts\activate
+# Mac/Linux
+source .venv/bin/activate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+pip install -r requirements.txt
+```
 
-## Learn More
+Set up the environment variables:
+Create a `.env` file in the `backend/` directory:
+```env
+MONGO_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/"
+GEMINI_API_KEY="your_gemini_api_key_here"
+```
 
-To learn more about Next.js, take a look at the following resources:
+*Note: Ensure the data file (`transactions.csv`) is present in the `backend/` directory.*
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start the FastAPI server:
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Frontend Setup
 
-## Deploy on Vercel
+Navigate to the project root directory:
+```bash
+# Install dependencies
+pnpm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Set up the frontend environment variables by creating a `.env.local` file in the root directory:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Start the Next.js development server:
+```bash
+pnpm dev
+```
+
+The application will now be running on [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Project Structure
+
+```text
+├── backend/                   # Python FastAPI Backend
+│   ├── main.py                # Server entry point
+│   ├── routers/chat.py        # Controller for chat API endpoints & pipeline
+│   ├── llm_service.py         # Google Gemini integration & prompt engineering
+│   ├── data_engine.py         # DuckDB execution engine
+│   ├── database.py            # MongoDB session persistence
+│   └── transactions.csv       # Sourced dataset constraints
+├── src/                       # Next.js Frontend
+│   ├── app/                   # App Router pages (page.tsx)
+│   ├── components/            # Reusable UI & DynamicRenderer components
+│   └── lib/                   # API utilities (frontend_api.ts) & helpers
+├── public/                    # Static assets
+└── tailwind.config.ts         # Tailwind configuration
+```
+
+## License
+This project is proprietary and intended for internal use at Finsight.AI.

@@ -431,7 +431,7 @@ export default function InsightXApp() {
         {/* Logo */}
         <div className="flex items-center gap-2.5">
           
-          <span className="text-lg font-bold tracking-tight">InsightX</span>
+          <span className="text-lg font-bold tracking-tight">Finsight.AI</span>
         </div>
 
         {/* Pill Tabs */}
@@ -863,7 +863,7 @@ export default function InsightXApp() {
                         Appearance
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Customize how InsightX looks on your device.
+                        Customize how Finsight.AI looks on your device.
                       </p>
                     </div>
                     <div className="px-5 pb-5 space-y-4">
@@ -1049,7 +1049,7 @@ export default function InsightXApp() {
                 </button>
               </div>
               <p className="text-center text-[10px] text-muted-foreground/50 mt-2">
-                InsightX may produce inaccurate information. Verify important
+                Finsight.AI may produce inaccurate information. Verify important
                 data independently.
               </p>
             </div>

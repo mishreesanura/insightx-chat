@@ -7,7 +7,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "InsightX - AI Analytics Platform",
+  title: "Finsight.AI - AI Analytics Platform",
   description: "Premium conversational AI interface for data analytics",
 };
 

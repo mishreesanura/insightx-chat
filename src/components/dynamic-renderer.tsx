@@ -166,32 +166,37 @@ function ChartRenderer({ component }: { component: any }) {
   const renderChart = () => {
     switch (chart_type) {
       /* ─── Pie ─── */
-      case "pie":
+      case "pie": {
+        const pieDataKey = series[0]?.dataKey ?? "value"
+        const pieNameKey = config?.xAxis?.dataKey ?? "category"
+        const pieData = data.map((d: any, i: number) => ({
+          ...d,
+          fill: d.fill || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
+        }))
+
         return (
           <PieChart>
             <ChartTooltip content={<ChartTooltipContent />} />
             <Pie
-              data={data}
-              dataKey={series[0]?.dataKey ?? "value"}
-              nameKey={config?.xAxis?.dataKey ?? "category"}
+              data={pieData}
+              dataKey={pieDataKey}
+              nameKey={pieNameKey}
               cx="50%"
               cy="50%"
               outerRadius={100}
               label
             >
-              {data.map((_: any, i: number) => (
+              {pieData.map((entry: any, i: number) => (
                 <Cell
                   key={i}
-                  fill={
-                    series[0]?.color ??
-                    DEFAULT_COLORS[i % DEFAULT_COLORS.length]
-                  }
+                  fill={entry.fill}
                 />
               ))}
             </Pie>
             <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
           </PieChart>
         )
+      }
 
       /* ─── Radar ─── */
       case "radar":
@@ -216,17 +221,23 @@ function ChartRenderer({ component }: { component: any }) {
         )
 
       /* ─── Radial ─── */
-      case "radial":
+      case "radial": {
+        const radialDataKey = series[0]?.dataKey ?? "value"
+        const radialData = data.map((d: any, i: number) => ({
+          ...d,
+          fill: d.fill || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
+        }))
+
         return (
           <RadialBarChart
-            data={data}
+            data={radialData}
             innerRadius="30%"
             outerRadius="100%"
             startAngle={180}
             endAngle={0}
           >
             <RadialBar
-              dataKey={series[0]?.dataKey ?? "value"}
+              dataKey={radialDataKey}
               background
               label={{ position: "insideStart", fill: "#fff" }}
             />
@@ -234,6 +245,7 @@ function ChartRenderer({ component }: { component: any }) {
             <Legend iconSize={10} wrapperStyle={{ fontSize: "12px" }} />
           </RadialBarChart>
         )
+      }
 
       /* ─── Composed (bar + line + area mix) ─── */
       case "composed":

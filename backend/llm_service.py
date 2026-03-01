@@ -94,6 +94,7 @@ async def generate_sql(
     )
 
     result = json.loads(response.text)
+    print(result)  # Log the generated SQL for debugging
     return result["sql_query"]
 
 
@@ -141,6 +142,7 @@ You must strictly adhere to the following schemas, allowed values, and data mapp
 
 Ensure the 'components' array is properly stringified before returning the final JSON.
 Do not use markdown code blocks.
+Do not use $Dollar symbols in the response. Use the INR currency format ₹
 """
 
 
