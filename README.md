@@ -7,10 +7,9 @@ Finsight.AI is an intelligent, natural-language data analytics platform built fo
 ![Finsight.AI - Screenshot 2](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391688/Screenshot_2026-03-02_003113_jo6rc5.png)
 
 <div align="center">
-  <video src="https://res.cloudinary.com/dk3mcvikk/video/upload/v1772393588/sample_vxs1g8.mp4" controls="controls" autoplay muted loop width="100%">
-  Your browser does not support the video tag.
-  </video>
+<video <video src='"D:\InsightX\insightx-chat\sample.mp4"' width=180/>
 </div>
+
 
 ## Features
 
