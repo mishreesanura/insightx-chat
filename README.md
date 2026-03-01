@@ -2,12 +2,6 @@
 
 Finsight.AI is an intelligent, natural-language data analytics platform built for digital payment operations. It allows users to query complex transaction data using plain English, automatically translates those queries into optimized SQL, executes them against a local analytical database, and visualizes the results using dynamically generated UI components such as charts, tables, and metric cards. Currently, the system is specifically tailored and trained on a proprietary dataset of financial transaction logs.
 
-![Finsight.AI - Screenshot 1](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391584/Screenshot_2026-02-28_123904_wuv1jb.png)
-
-![Finsight.AI - Screenshot 2](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391688/Screenshot_2026-03-02_003113_jo6rc5.png)
-
-
-
 
 
 ## Features
@@ -18,6 +12,9 @@ Finsight.AI is an intelligent, natural-language data analytics platform built fo
 - **Chat Archive & History**: Persistent chat sessions are stored in MongoDB. Users can manage previous analyses by renaming, starring, or deleting sessions.
 - **Customizable Interface**: Includes toggleable Dark/Light mode, a Compact mode for dense information viewing, and custom auto-scroll behaviors.
 
+![Finsight.AI - Screenshot 1](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391584/Screenshot_2026-02-28_123904_wuv1jb.png)
+
+![Finsight.AI - Screenshot 2](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391688/Screenshot_2026-03-02_003113_jo6rc5.png)
 
 ![sample](https://github.com/user-attachments/assets/e5d318ac-7904-4f40-8275-04f279537df0)
 
