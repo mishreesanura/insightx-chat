@@ -6,9 +6,9 @@ Finsight.AI is an intelligent, natural-language data analytics platform built fo
 
 ![Finsight.AI - Screenshot 2](https://res.cloudinary.com/dk3mcvikk/image/upload/v1772391688/Screenshot_2026-03-02_003113_jo6rc5.png)
 
-<video src="sample.mp4" width="100%" controls autoplay loop mute>
-  Your browser does not support the video tag.
-</video>
+
+
+
 
 ## Features
 
@@ -17,6 +17,10 @@ Finsight.AI is an intelligent, natural-language data analytics platform built fo
 - **Dynamic UI Generation**: The system determines the optimal method to visualize your data, seamlessly rendering composed charts, interactive tables, metric carousels, and context-aware follow-up suggestions.
 - **Chat Archive & History**: Persistent chat sessions are stored in MongoDB. Users can manage previous analyses by renaming, starring, or deleting sessions.
 - **Customizable Interface**: Includes toggleable Dark/Light mode, a Compact mode for dense information viewing, and custom auto-scroll behaviors.
+
+
+![sample](https://github.com/user-attachments/assets/e5d318ac-7904-4f40-8275-04f279537df0)
+
 
 ## Sample Queries
 
